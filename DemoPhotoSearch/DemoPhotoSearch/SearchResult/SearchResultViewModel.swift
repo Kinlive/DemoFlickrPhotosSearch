@@ -19,6 +19,8 @@ class SearchResultViewModel {
 
   // Input
   let startRequest: AnyObserver<Void>
+  let refreshActive: AnyObserver<Void>
+
   // Output
   let onFetchError = PublishSubject<Error>()
   let cellViewModel = PublishSubject<[SearchResultCellViewModel]>()
@@ -32,7 +34,10 @@ class SearchResultViewModel {
     let reload = PublishSubject<Void>()
     startRequest = reload.asObserver()
 
-    reload
+    let _refreshActive = PublishSubject<Void>()
+    refreshActive = _refreshActive.asObserver()
+
+    Observable.from([reload, _refreshActive]).merge()
       .subscribe(onNext: { [unowned self] _ in
         let requestType: FlickerType = .search(parameters: [
           "method" : "flickr.photos.search",
@@ -43,6 +48,7 @@ class SearchResultViewModel {
           "per_page" : searchInfo.perPage,
           "page" : "\(self.currentPage)"
         ])
+
         self.request(type: requestType)
         self.currentPage = (Int(searchInfo.perPage) ?? 0)
       })

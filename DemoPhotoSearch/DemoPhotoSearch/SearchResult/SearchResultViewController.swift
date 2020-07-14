@@ -23,6 +23,8 @@ class SearchResultViewController: UIViewController {
     return collectionView
   }()
 
+  lazy var refreshControl = UIRefreshControl()
+
   private let viewModel: SearchResultViewModel
   private let constraints = Constraints()
   private let disposeBag = DisposeBag()
@@ -67,10 +69,22 @@ class SearchResultViewController: UIViewController {
       .bind(onNext: { title in self.tabBarController?.title = title })
       .disposed(by: disposeBag)
 
+    // when refresh's value changed start reload data.
+    refreshControl.rx.controlEvent(.valueChanged).asObservable()
+      .bind(to: viewModel.refreshActive)
+      .disposed(by: disposeBag)
+
+    // when receive new element of cellViewModel that means
+    // request finished, stop the refreshControl.
+    viewModel.cellViewModel.asObserver()
+      .map { _ in false }
+      .bind(to: refreshControl.rx.isRefreshing)
+      .disposed(by: disposeBag)
   }
 
   private func addSubviews() {
     view.addSubview(resultCollectionView)
+    resultCollectionView.refreshControl = refreshControl
   }
 
   // setup constraint of subviews
