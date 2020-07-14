@@ -59,9 +59,11 @@ class SearchResultCell: UICollectionViewCell {
 
   private func layoutConstraints() {
     // imageView
-    subviewsConstraints.image.top = imageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 5)
-    subviewsConstraints.image.left = imageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 5)
-    subviewsConstraints.image.right = imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -5)
+    subviewsConstraints.image.top = imageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10)
+    subviewsConstraints.image.centerX = imageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor)
+    let width = contentView.frame.width * 0.7
+    subviewsConstraints.image.width = imageView.widthAnchor.constraint(equalToConstant: width)
+    subviewsConstraints.image.height = imageView.heightAnchor.constraint(equalToConstant: width)
 
     // title
     subviewsConstraints.title.top = title.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 5)

@@ -23,26 +23,30 @@ class SearchResultCellViewModel {
     let imageUrlString = "https://farm\(model.farm).staticflickr.com/\(model.server)/\(model.id)_\(model.secret).jpg"
 
     imageDownloaded = Observable<UIImage?>.create({ (observer) -> Disposable in
-        if let image = CacheManager.shared.photoCache.value(forKey: imageUrlString) {
-          observer.onNext(image)
-          observer.onCompleted()
-        } else {
-          DispatchQueue.global().async {
-            do {
-              if let url = URL(string: imageUrlString) {
-                 let data = try Data(contentsOf: url)
-                let image = UIImage(data: data)
+
+      if let image = CacheManager.shared.photoCache.value(forKey: imageUrlString) {
+        observer.onNext(image)
+        observer.onCompleted()
+      } else {
+        DispatchQueue.global().async {
+          do {
+            if let url = URL(string: imageUrlString) {
+              let data = try Data(contentsOf: url)
+              let image = UIImage(data: data)
+              DispatchQueue.main.async {
+                // if download image cache it when next time reload use.
                 CacheManager.shared.photoCache.insert(image, forKey: imageUrlString)
-                observer.onNext(image)
-                observer.onCompleted()
               }
-            } catch let error {
-              observer.onError(error)
+              observer.onNext(image)
+              observer.onCompleted()
             }
+          } catch let error {
+            observer.onError(error)
           }
         }
+      }
       return Disposables.create {}
-      })
+    })
       .observeOn(MainScheduler.instance)
       .asDriver(onErrorJustReturn: UIImage(named: "placeholder"))
       .asObservable()

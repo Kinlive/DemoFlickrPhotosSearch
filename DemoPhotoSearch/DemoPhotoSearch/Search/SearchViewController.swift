@@ -12,6 +12,7 @@ import RxCocoa
 
 class SearchViewController: UIViewController {
 
+  // MARK: - UIs
   lazy var inputTextField: UITextField = {
     let textField = UITextField()
     textField.borderStyle = .roundedRect
@@ -41,6 +42,7 @@ class SearchViewController: UIViewController {
     return button
   }()
 
+  // MARK: - Properties.
   private let viewModel: SearchViewModel
   private let constraints = Constraints()
   private let disposeBag = DisposeBag()
@@ -68,23 +70,26 @@ class SearchViewController: UIViewController {
     layoutConstriants()
   }
 
+  // MARK: - Private methods
   private func binds() {
-
+    // bind search text to viewModel
     inputTextField.rx.text.orEmpty
       .bind(to: viewModel.searchText)
       .disposed(by: disposeBag)
 
+    // bind perPage to viewModel
     perPagesTextField.rx.text.orEmpty
       .bind(to: viewModel.perPage)
       .disposed(by: disposeBag)
 
+    // subscribe event when button tapped to show search result
     sendButton.rx.tap
       .map { [unowned self] _ in (self.inputTextField.text ?? "", self.perPagesTextField.text ?? "") }
       .map { SearchViewModel.SearchInfo(text: $0, perPage: $1)}
       .subscribe(onNext: { [unowned self] info in self.showSearchResult(searchInfo: info) })
       .disposed(by: disposeBag)
 
-
+    // enable the sendButton when textField all typed.
     viewModel.isSendButtonEnable
       .bind(to: sendButton.rx.isEnabled)
       .disposed(by: disposeBag)
@@ -123,7 +128,7 @@ class SearchViewController: UIViewController {
     constraints.activate()
   }
 
-  func showSearchResult(searchInfo: SearchViewModel.SearchInfo) {
+  private func showSearchResult(searchInfo: SearchViewModel.SearchInfo) {
     let tabBarController = UITabBarController()
 
     var viewControllers: [UIViewController] = []
